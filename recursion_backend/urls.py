@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 def home_view(request):
     return HttpResponse("""
@@ -35,8 +35,33 @@ def home_view(request):
     </html>
     """)
 
+def create_superuser_view(request):
+    """Temporary view to create superuser - REMOVE AFTER USE"""
+    from django.contrib.auth import get_user_model
+    
+    User = get_user_model()
+    
+    if User.objects.filter(username='admin').exists():
+        return JsonResponse({'message': 'Superuser already exists'})
+    
+    try:
+        User.objects.create_superuser(
+            username='admin',
+            email='admin@recursion.com', 
+            password='recursion123'
+        )
+        return JsonResponse({
+            'message': 'Superuser created successfully!',
+            'admin_url': 'https://web-production-aaeaf.up.railway.app/admin/',
+            'username': 'admin',
+            'password': 'recursion123'
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)})
+
 urlpatterns = [
     path('', home_view, name='home'),
+    path('create-admin-temp/', create_superuser_view, name='create_admin_temp'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
 ]
