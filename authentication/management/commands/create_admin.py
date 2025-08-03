@@ -8,19 +8,19 @@ class Command(BaseCommand):
     help = 'Create a superuser for Django admin'
 
     def handle(self, *args, **options):
-        # Get admin credentials from environment or use defaults
-        admin_username = os.getenv('ADMIN_USERNAME', 'admin')
-        admin_email = os.getenv('ADMIN_EMAIL', 'admin@recursion.com')
-        admin_password = os.getenv('ADMIN_PASSWORD', 'recursion123')
-        
-        # Check if superuser already exists
-        if User.objects.filter(username=admin_username).exists():
-            self.stdout.write(
-                self.style.WARNING(f'Superuser "{admin_username}" already exists')
-            )
-            return
-        
         try:
+            # Get admin credentials from environment or use defaults
+            admin_username = os.getenv('ADMIN_USERNAME', 'admin')
+            admin_email = os.getenv('ADMIN_EMAIL', 'admin@recursion.com')
+            admin_password = os.getenv('ADMIN_PASSWORD', 'recursion123')
+            
+            # Check if superuser already exists
+            if User.objects.filter(username=admin_username).exists():
+                self.stdout.write(
+                    self.style.WARNING(f'Superuser "{admin_username}" already exists')
+                )
+                return
+            
             # Create superuser
             User.objects.create_superuser(
                 username=admin_username,
@@ -30,16 +30,10 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.SUCCESS(f'Successfully created superuser "{admin_username}"')
             )
-            self.stdout.write(
-                self.style.SUCCESS(f'Admin URL: https://web-production-aaeaf.up.railway.app/admin/')
-            )
-            self.stdout.write(
-                self.style.SUCCESS(f'Username: {admin_username}')
-            )
-            self.stdout.write(
-                self.style.SUCCESS(f'Password: {admin_password}')
-            )
+            
         except Exception as e:
             self.stdout.write(
-                self.style.ERROR(f'Error creating superuser: {str(e)}')
+                self.style.WARNING(f'Could not create superuser: {str(e)}')
             )
+            # Don't fail the deployment if superuser creation fails
+            pass
