@@ -16,8 +16,27 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import HttpResponse
+
+def home_view(request):
+    return HttpResponse("""
+    <html>
+    <head><title>RECursion Backend</title></head>
+    <body>
+        <h1>RECursion Backend API</h1>
+        <ul>
+            <li><a href="/admin/">Django Admin Panel</a></li>
+            <li><a href="/api/auth/health/">API Health Check</a></li>
+            <li><a href="/api/auth/register/">User Registration</a></li>
+            <li><a href="/api/auth/login/">User Login</a></li>
+        </ul>
+        <p>Backend is working! ✅</p>
+    </body>
+    </html>
+    """)
 
 urlpatterns = [
+    path('', home_view, name='home'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
 ]

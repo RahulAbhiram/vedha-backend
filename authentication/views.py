@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserSerializer, UserProfileSerializer
 from .models import CustomUser, UserProfile
+from django.http import HttpResponse
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -137,3 +138,16 @@ def update_profile(request):
         return Response({
             'error': 'Profile not found'
         }, status=status.HTTP_404_NOT_FOUND)
+
+def admin_test(request):
+    """Simple test view to check if Django is working"""
+    return HttpResponse("""
+    <html>
+    <head><title>Django Test</title></head>
+    <body>
+        <h1>Django is Working!</h1>
+        <p>Admin URL: <a href="/admin/">/admin/</a></p>
+        <p>API Health: <a href="/api/auth/health/">/api/auth/health/</a></p>
+    </body>
+    </html>
+    """)
