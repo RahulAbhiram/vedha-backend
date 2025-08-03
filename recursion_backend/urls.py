@@ -59,9 +59,57 @@ def create_superuser_view(request):
     except Exception as e:
         return JsonResponse({'error': str(e)})
 
+def check_admin_view(request):
+    """Check admin user details for debugging"""
+    from django.contrib.auth import get_user_model
+    
+    User = get_user_model()
+    
+    try:
+        admin_user = User.objects.get(username='admin')
+        return JsonResponse({
+            'username': admin_user.username,
+            'email': admin_user.email,
+            'is_superuser': admin_user.is_superuser,
+            'is_staff': admin_user.is_staff,
+            'is_active': admin_user.is_active,
+            'message': 'Admin user found',
+            'login_hint': 'Try username: admin, password: recursion123'
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Admin user not found'})
+
+def reset_admin_view(request):
+    """Reset admin password"""
+    from django.contrib.auth import get_user_model
+    
+    User = get_user_model()
+    
+    try:
+        admin_user = User.objects.get(username='admin')
+        admin_user.set_password('recursion123')
+        admin_user.is_superuser = True
+        admin_user.is_staff = True
+        admin_user.is_active = True
+        admin_user.save()
+        return JsonResponse({
+            'message': 'Admin password reset successfully',
+            'username': 'admin',
+            'password': 'recursion123'
+        })
+    except User.DoesNotExist:
+        # Create new admin if doesn't exist
+        User.objects.create_superuser('admin', 'admin@recursion.com', 'recursion123')
+        return JsonResponse({
+            'message': 'Admin user created successfully',
+            'username': 'admin',
+            'password': 'recursion123'
+        })
+
 urlpatterns = [
     path('', home_view, name='home'),
-    path('create-admin-temp/', create_superuser_view, name='create_admin_temp'),
+    path('check-admin/', check_admin_view, name='check_admin'),
+    path('reset-admin/', reset_admin_view, name='reset_admin'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
 ]
