@@ -9,6 +9,23 @@ from django.utils.decorators import method_decorator
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserSerializer, UserProfileSerializer
 from .models import CustomUser, UserProfile
 
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def health_check(request):
+    """
+    Simple health check endpoint
+    """
+    return Response({
+        'status': 'ok',
+        'message': 'API is working!',
+        'endpoints': [
+            '/api/auth/register/',
+            '/api/auth/login/',
+            '/api/auth/logout/',
+            '/api/auth/profile/'
+        ]
+    }, status=status.HTTP_200_OK)
+
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes([AllowAny])
