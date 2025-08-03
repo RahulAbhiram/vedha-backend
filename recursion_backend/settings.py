@@ -29,7 +29,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-t499q$@u5os-kl%c5x8h9=dq^!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,web-production-aaeaf.up.railway.app,*.railway.app,rahulabhiram.github.io').split(',')
 
 
 # Application definition
@@ -134,11 +134,27 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3000", 
     "https://rahulabhiram.github.io",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+# Additional CORS settings for production
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.up\.railway\.app$",
+]
+
+# CSRF settings for production
+CSRF_TRUSTED_ORIGINS = [
+    "https://rahulabhiram.github.io",
+    "https://web-production-aaeaf.up.railway.app",
+    "https://*.up.railway.app",
+]
+
+# Security settings
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 # Set to False in production for better security
 CORS_ALLOW_ALL_ORIGINS = os.getenv('DEBUG', 'False').lower() == 'true'
@@ -168,8 +184,8 @@ REST_FRAMEWORK = {
     ],
 }
 
-# Allow localhost for development
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# Allow hosts for production and development
+# ALLOWED_HOSTS is set earlier in the file with environment variable
 
 # Custom user model
 AUTH_USER_MODEL = 'authentication.CustomUser'
