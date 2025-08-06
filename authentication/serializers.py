@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import CustomUser, UserProfile
+from .models import CustomUser, UserProfile, InterviewExperience, TaskExperience
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
@@ -56,3 +56,29 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ('user', 'bio', 'location', 'birth_date', 'avatar')
+
+class InterviewExperienceSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)
+    
+    class Meta:
+        model = InterviewExperience
+        fields = '__all__'
+        read_only_fields = ('user', 'created_at', 'updated_at')
+
+class TaskExperienceSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)
+    
+    class Meta:
+        model = TaskExperience
+        fields = '__all__'
+        read_only_fields = ('user', 'created_at', 'updated_at')
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    profile = UserProfileSerializer(read_only=True)
+    interview_experiences = InterviewExperienceSerializer(many=True, read_only=True)
+    task_experiences = TaskExperienceSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = CustomUser
+        fields = ('id', 'username', 'email', 'profile', 'interview_experiences', 'task_experiences', 'created_at')
+        read_only_fields = ('id', 'created_at')

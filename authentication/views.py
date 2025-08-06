@@ -1,4 +1,4 @@
-from rest_framework import status
+from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -6,8 +6,8 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserSerializer, UserProfileSerializer
-from .models import CustomUser, UserProfile
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserSerializer, UserProfileSerializer, InterviewExperienceSerializer, TaskExperienceSerializer, UserDetailSerializer
+from .models import CustomUser, UserProfile, InterviewExperience, TaskExperience
 from django.http import HttpResponse
 
 @api_view(['GET'])
@@ -138,6 +138,112 @@ def update_profile(request):
         return Response({
             'error': 'Profile not found'
         }, status=status.HTTP_404_NOT_FOUND)
+
+# Interview Experience Views
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def interview_experience_list_create(request):
+    if request.method == 'GET':
+        experiences = InterviewExperience.objects.filter(user=request.user)
+        serializer = InterviewExperienceSerializer(experiences, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        serializer = InterviewExperienceSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def interview_experience_detail(request, pk):
+    try:
+        experience = InterviewExperience.objects.get(pk=pk, user=request.user)
+    except InterviewExperience.DoesNotExist:
+        return Response({'error': 'Interview experience not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = InterviewExperienceSerializer(experience)
+        return Response(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = InterviewExperienceSerializer(experience, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'DELETE':
+        experience.delete()
+        return Response({'message': 'Interview experience deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+# Task Experience Views
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def task_experience_list_create(request):
+    if request.method == 'GET':
+        tasks = TaskExperience.objects.filter(user=request.user)
+        serializer = TaskExperienceSerializer(tasks, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        serializer = TaskExperienceSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def task_experience_detail(request, pk):
+    try:
+        task = TaskExperience.objects.get(pk=pk, user=request.user)
+    except TaskExperience.DoesNotExist:
+        return Response({'error': 'Task experience not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = TaskExperienceSerializer(task)
+        return Response(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = TaskExperienceSerializer(task, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'DELETE':
+        task.delete()
+        return Response({'message': 'Task experience deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+# Public Views for displaying all users' experiences
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def public_interview_experiences(request):
+    """Get all interview experiences from all users (public view)"""
+    experiences = InterviewExperience.objects.all()
+    serializer = InterviewExperienceSerializer(experiences, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def public_task_experiences(request):
+    """Get all task experiences from all users (public view)"""
+    tasks = TaskExperience.objects.all()
+    serializer = TaskExperienceSerializer(tasks, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def user_profile_detail(request, user_id):
+    """Get detailed user profile with all their experiences"""
+    try:
+        user = CustomUser.objects.get(id=user_id)
+        serializer = UserDetailSerializer(user)
+        return Response(serializer.data)
+    except CustomUser.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
 def admin_test(request):
     """Simple test view to check if Django is working"""
