@@ -82,8 +82,6 @@ def recreate_admin_view(request):
 
 urlpatterns = [
     path('', home_view, name='home'),
-    path('debug-admin/', debug_admin_view, name='debug_admin'),
-    path('recreate-admin/', recreate_admin_view, name='recreate_admin'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
 ]
