@@ -84,4 +84,7 @@ urlpatterns = [
     path('', home_view, name='home'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
+    # Debug endpoints for admin management
+    path('debug/admin/', debug_admin_view, name='debug_admin'),
+    path('debug/create-admin/', recreate_admin_view, name='recreate_admin'),
 ]
